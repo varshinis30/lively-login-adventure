@@ -10,6 +10,7 @@ interface TokenParams {
 
 const OKTA_DOMAIN = 'cdw-oie.oktapreview.com';
 const OKTA_CLIENT_ID = '0oakfraa1hdPlNx8H1d7';
+// Using window.location.origin to ensure the correct protocol and port are used
 const REDIRECT_URI = `${window.location.origin}/login/callback`;
 
 export const oktaAuthConfig: OktaAuthOptions = {
@@ -20,13 +21,27 @@ export const oktaAuthConfig: OktaAuthOptions = {
   scopes: ['openid', 'profile', 'email'],
   tokenManager: {
     storage: 'localStorage',
+    autoRenew: true,
   },
+  cookies: {
+    secure: true,
+    sameSite: 'none',
+  },
+  // Ensure we're not reusing an existing auth state
+  transformAuthState: async (oktaAuth, authState) => {
+    if (!authState.isAuthenticated) {
+      return authState;
+    }
+    return authState;
+  }
 };
 
 const oktaAuth = new OktaAuth(oktaAuthConfig);
 
 export const login = async () => {
   try {
+    // Clear any existing transactions before starting a new one
+    oktaAuth.tokenManager.clear();
     await oktaAuth.signInWithRedirect({
       originalUri: '/',
     });

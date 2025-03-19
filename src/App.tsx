@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import Home from "./pages/Home";
@@ -27,7 +27,7 @@ const App = () => (
                 <Route path="/" element={<Home />} />
                 <Route path="/video" element={<VideoPage />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/login/callback" element={<Navigate to="/video" />} />
+                <Route path="/login/callback" element={null} /> {/* Empty element, the auth provider will handle redirection */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

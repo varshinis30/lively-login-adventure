@@ -33,10 +33,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initAuth = async () => {
       setIsLoading(true);
       try {
+        // Clear any stale authentication state
+        if (location.pathname !== '/login/callback') {
+          // Only clear if not in callback to prevent disrupting the auth flow
+          const existingTokens = await oktaAuth.tokenManager.getTokens();
+          if (!existingTokens) {
+            oktaAuth.tokenManager.clear();
+          }
+        }
+        
         // Handle callback if on callback route
         if (location.pathname === '/login/callback') {
           await handleAuthCallback();
           navigate('/video');
+          return; // Prevent further checks during callback processing
         }
 
         const authenticated = await checkAuth();
@@ -61,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async () => {
     setIsLoading(true);
     try {
+      console.log("Starting Okta login process...");
       await oktaLogin();
     } catch (error) {
       console.error('Login error:', error);
