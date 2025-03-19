@@ -35,7 +35,11 @@ export const Navbar = () => {
             to="/" 
             className="flex items-center space-x-2"
           >
-            <span className="text-xl font-bold text-clip-gradient">IAM Security</span>
+            <img 
+              src="/lovable-uploads/bfc48efa-65bb-4db5-a0f6-6ce49f64431d.png" 
+              alt="CDW Logo" 
+              className="h-10" 
+            />
           </Link>
           
           {/* Desktop menu */}

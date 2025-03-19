@@ -1,21 +1,13 @@
 
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from "@/components/ui/use-toast";
-import oktaAuth, { getAuthState, getUserInfo, loginWithRedirect, logout } from '@/lib/auth';
-
-interface User {
-  name?: string;
-  email?: string;
-  username?: string;
-  sub?: string;
-  [key: string]: any;
-}
+import { UserClaims } from '@okta/okta-auth-js';
+import oktaAuth, { login as oktaLogin, logout as oktaLogout, isAuthenticated as checkAuth, getUserInfo, handleAuthCallback } from '@/lib/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: User | null;
+  user: UserClaims | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -30,106 +22,69 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserClaims | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if user is authenticated
   useEffect(() => {
-    const checkAuth = async () => {
+    const initAuth = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        
-        // Handle callback from Okta
+        // Handle callback if on callback route
         if (location.pathname === '/login/callback') {
-          await oktaAuth.handleRedirectCallback();
+          await handleAuthCallback();
           navigate('/video');
-          return;
         }
 
-        const authState = await getAuthState();
-        
-        if (authState.isAuthenticated) {
+        const authenticated = await checkAuth();
+        setIsAuthenticated(authenticated);
+
+        if (authenticated) {
           const userInfo = await getUserInfo();
           setUser(userInfo);
-          setIsAuthenticated(true);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-          
-          // Redirect to home if trying to access protected routes
-          if (
-            location.pathname === '/video' || 
-            location.pathname === '/profile'
-          ) {
-            toast({
-              title: "Authentication Required",
-              description: "Please log in to access this page.",
-              variant: "destructive",
-            });
-            navigate('/');
-          }
         }
       } catch (error) {
-        console.error('Auth check error:', error);
-        setUser(null);
+        console.error('Authentication error:', error);
         setIsAuthenticated(false);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkAuth();
-  }, [location.pathname, navigate]);
+    initAuth();
+  }, [navigate, location.pathname]);
 
-  // Login handler
-  const handleLogin = async () => {
+  const login = async () => {
+    setIsLoading(true);
     try {
-      await loginWithRedirect();
+      await oktaLogin();
     } catch (error) {
       console.error('Login error:', error);
-      toast({
-        title: "Login Failed",
-        description: "There was a problem logging in with Okta.",
-        variant: "destructive",
-      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Logout handler
-  const handleLogout = async () => {
+  const logout = async () => {
+    setIsLoading(true);
     try {
-      await logout();
-      setUser(null);
+      await oktaLogout();
       setIsAuthenticated(false);
-      toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out.",
-      });
+      setUser(null);
       navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
-      toast({
-        title: "Logout Failed",
-        description: "There was a problem logging out.",
-        variant: "destructive",
-      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        isLoading,
-        user,
-        login: handleLogin,
-        logout: handleLogout,
-      }}
-    >
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
