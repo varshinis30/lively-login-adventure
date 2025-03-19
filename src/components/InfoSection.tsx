@@ -1,147 +1,58 @@
 
-import { useEffect, useRef } from 'react';
-import { Separator } from '@/components/ui/separator';
-import { 
-  ShieldCheck, 
-  Users, 
-  Lock, 
-  Key, 
-  Shield, 
-  BarChart 
-} from 'lucide-react';
-
-interface FeatureProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-const Feature = ({ icon, title, description }: FeatureProps) => (
-  <div className="bg-card shadow-sm hover:shadow-md transition-shadow p-6 rounded-xl border animate-on-scroll opacity-0 translate-y-10 transition-all duration-700">
-    <div className="mb-4 text-primary">{icon}</div>
-    <h3 className="text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-muted-foreground">{description}</p>
-  </div>
-);
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
 
 export const InfoSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const elements = entry.target.querySelectorAll('.animate-on-scroll');
-            elements.forEach((el, index) => {
-              setTimeout(() => {
-                el.classList.add('opacity-100');
-                el.classList.remove('opacity-0', 'translate-y-10');
-              }, index * 150);
-            });
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-      }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
-
-  const features = [
-    {
-      icon: <ShieldCheck size={32} />,
-      title: "Advanced Authentication",
-      description: "Multi-factor authentication and risk-based access controls to protect sensitive resources.",
-    },
-    {
-      icon: <Users size={32} />,
-      title: "Identity Governance",
-      description: "Comprehensive identity lifecycle management with automated provisioning.",
-    },
-    {
-      icon: <Lock size={32} />,
-      title: "Zero Trust Security",
-      description: "Implement zero trust architecture with continuous verification mechanisms.",
-    },
-    {
-      icon: <Key size={32} />,
-      title: "Privileged Access",
-      description: "Secure privileged access management with just-in-time provisioning.",
-    },
-    {
-      icon: <Shield size={32} />,
-      title: "Compliance Management",
-      description: "Stay compliant with regulatory requirements through automated reporting.",
-    },
-    {
-      icon: <BarChart size={32} />,
-      title: "Security Analytics",
-      description: "Advanced analytics and reporting to detect anomalies and potential threats.",
-    },
-  ];
-
   return (
-    <section 
-      id="info-section" 
-      ref={sectionRef}
-      className="py-24 bg-background"
-    >
+    <section id="info-section" className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-3 py-1 text-sm font-medium bg-secondary/20 text-secondary rounded-full mb-4 animate-on-scroll opacity-0 translate-y-10 transition-all duration-700">
-            Our Expertise
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 animate-on-scroll opacity-0 translate-y-10 transition-all duration-700">
-            IAM Security Team
-          </h2>
-          <p className="text-lg text-muted-foreground animate-on-scroll opacity-0 translate-y-10 transition-all duration-700">
-            Our team of security experts has decades of combined experience in protecting enterprise identity infrastructure and implementing robust security measures.
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">Meet Our Team</h2>
+          <p className="text-xl text-muted-foreground text-center mb-8">
+            We are the IAM Security Team at CDW, dedicated to protecting your organization's identity infrastructure with innovative solutions.
           </p>
-        </div>
-        
-        <Separator className="my-12 max-w-xl mx-auto" />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <Feature 
-              key={index} 
-              icon={feature.icon} 
-              title={feature.title} 
-              description={feature.description} 
-            />
-          ))}
-        </div>
-        
-        <div className="mt-20 max-w-3xl mx-auto text-center animate-on-scroll opacity-0 translate-y-10 transition-all duration-700">
-          <div className="glass p-8 rounded-2xl">
-            <h3 className="text-2xl font-bold mb-4">Why Choose Our Team?</h3>
-            <p className="text-muted-foreground mb-6">
-              With a proven track record of successful IAM deployments across Fortune 500 companies, our team brings unparalleled expertise to solve your most complex security challenges.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-                24/7 Support
+          
+          <div className="flex justify-center mb-12">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="group"
+              onClick={() => window.open("https://www.cdw.com/content/cdw/en/solutions/cybersecurity/identity-access-management.html", "_blank")}
+            >
+              Learn more about our IAM solutions
+              <ExternalLink className="ml-2 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="glass p-6 rounded-lg text-center">
+              <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-primary">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                </svg>
               </div>
-              <div className="bg-secondary/10 text-secondary px-4 py-2 rounded-full text-sm font-medium">
-                Certified Experts
+              <h3 className="text-lg font-semibold mb-2">Expert Team</h3>
+              <p className="text-muted-foreground">Our certified security professionals bring years of experience securing enterprise identities.</p>
+            </div>
+            
+            <div className="glass p-6 rounded-lg text-center">
+              <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-primary">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                </svg>
               </div>
-              <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-                Global Coverage
+              <h3 className="text-lg font-semibold mb-2">Tailored Solutions</h3>
+              <p className="text-muted-foreground">We customize IAM solutions to match your unique business requirements and security needs.</p>
+            </div>
+            
+            <div className="glass p-6 rounded-lg text-center">
+              <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-primary">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
+                </svg>
               </div>
-              <div className="bg-secondary/10 text-secondary px-4 py-2 rounded-full text-sm font-medium">
-                Rapid Response
-              </div>
+              <h3 className="text-lg font-semibold mb-2">Proven Results</h3>
+              <p className="text-muted-foreground">Our track record speaks for itself with successful implementations across diverse industries.</p>
             </div>
           </div>
         </div>

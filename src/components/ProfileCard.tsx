@@ -12,14 +12,16 @@ export const ProfileCard = () => {
 
   // Get user initials for avatar fallback
   const getInitials = () => {
-    if (user.name) {
+    if (user.name && typeof user.name === 'string') {
       return user.name
         .split(' ')
         .map(name => name[0])
         .join('')
         .toUpperCase();
     }
-    return user.username?.substring(0, 2).toUpperCase() || 'U';
+    return user.username && typeof user.username === 'string' 
+      ? user.username.substring(0, 2).toUpperCase() 
+      : 'U';
   };
 
   return (
@@ -31,7 +33,7 @@ export const ProfileCard = () => {
             <CardDescription>Your Okta account information</CardDescription>
           </div>
           <Avatar className="h-16 w-16">
-            <AvatarImage src={user.picture} alt={user.name || 'User'} />
+            <AvatarImage src={typeof user.picture === 'string' ? user.picture : undefined} alt={typeof user.name === 'string' ? user.name : 'User'} />
             <AvatarFallback className="bg-primary text-primary-foreground text-lg">
               {getInitials()}
             </AvatarFallback>
@@ -42,26 +44,32 @@ export const ProfileCard = () => {
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-1.5">
             <h3 className="text-sm font-medium text-muted-foreground">Full Name</h3>
-            <p className="text-base font-medium">{user.name || 'Not provided'}</p>
+            <p className="text-base font-medium">{typeof user.name === 'string' ? user.name : 'Not provided'}</p>
           </div>
           
           <div className="space-y-1.5">
             <h3 className="text-sm font-medium text-muted-foreground">Username</h3>
-            <p className="text-base font-medium">{user.username || user.preferred_username || 'Not provided'}</p>
+            <p className="text-base font-medium">
+              {typeof user.username === 'string' 
+                ? user.username 
+                : typeof user.preferred_username === 'string' 
+                  ? user.preferred_username 
+                  : 'Not provided'}
+            </p>
           </div>
           
           <div className="space-y-1.5">
             <h3 className="text-sm font-medium text-muted-foreground">Email</h3>
-            <p className="text-base font-medium">{user.email || 'Not provided'}</p>
+            <p className="text-base font-medium">{typeof user.email === 'string' ? user.email : 'Not provided'}</p>
           </div>
           
-          {user.groups && (
+          {user.groups && Array.isArray(user.groups) && (
             <div className="space-y-1.5">
               <h3 className="text-sm font-medium text-muted-foreground">Groups</h3>
               <div className="flex flex-wrap gap-2">
-                {user.groups.map((group: string, index: number) => (
+                {user.groups.map((group, index) => (
                   <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/20 text-secondary">
-                    {group}
+                    {typeof group === 'string' ? group : String(group)}
                   </span>
                 ))}
               </div>
