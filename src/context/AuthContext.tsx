@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserClaims } from '@okta/okta-auth-js';
 import oktaAuth, { login as oktaLogin, logout as oktaLogout, isAuthenticated as checkAuth, getUserInfo, handleAuthCallback } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserClaims | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -75,6 +77,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await oktaLogin();
     } catch (error) {
       console.error('Login error:', error);
+      toast({
+        title: "Login failed",
+        description: "We couldn't log you in. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -83,12 +90,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     setIsLoading(true);
     try {
-      await oktaLogout();
+      // First update local state
       setIsAuthenticated(false);
       setUser(null);
-      navigate('/');
+      
+      // Then perform the Okta logout
+      await oktaLogout();
+      
+      // Show success toast
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      
+      // Redirect to home page
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
+      toast({
+        title: "Logout issue",
+        description: "There was a problem logging you out. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

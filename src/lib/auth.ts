@@ -53,9 +53,18 @@ export const login = async () => {
 
 export const logout = async () => {
   try {
+    // First clear the token manager
+    oktaAuth.tokenManager.clear();
+    
+    // Then perform the signOut operation
     await oktaAuth.signOut({
       postLogoutRedirectUri: window.location.origin,
+      clearTokensBeforeRedirect: true, // Ensure tokens are cleared before redirect
     });
+    
+    // Additional cleanup to ensure full logout
+    localStorage.removeItem('okta-token-storage');
+    sessionStorage.clear();
   } catch (error) {
     console.error('Error during logout:', error);
     throw error;
