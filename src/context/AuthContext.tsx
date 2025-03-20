@@ -2,7 +2,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserClaims } from '@okta/okta-auth-js';
-import oktaAuth, { login as oktaLogin, logout as oktaLogout, isAuthenticated as checkAuth, getUserInfo, handleAuthCallback } from '@/lib/auth';
+import { useOktaAuth } from '@okta/okta-react';
+import oktaAuth, { login as oktaLogin, isAuthenticated as checkAuth, getUserInfo, handleAuthCallback } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { oktaAuth: oktaAuthFromHook } = useOktaAuth();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -94,14 +96,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAuthenticated(false);
       setUser(null);
       
-      // Then perform the Okta logout
-      await oktaLogout();
+      // Use the useOktaAuth hook's signOut method
+      await oktaAuthFromHook.signOut();
       
       // Show success toast
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account.",
       });
+      
+      // Additional cleanup
+      localStorage.removeItem('okta-token-storage');
+      sessionStorage.clear();
       
       // Redirect to home page
       navigate('/', { replace: true });

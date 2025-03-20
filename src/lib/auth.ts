@@ -1,13 +1,6 @@
 
 import { OktaAuth, OktaAuthOptions, UserClaims } from '@okta/okta-auth-js';
 
-interface TokenParams {
-  scopes?: string[];
-  authorizeUrl?: string;
-  pkce?: boolean;
-  redirectUri?: string;
-}
-
 const OKTA_DOMAIN = 'cdw-oie.oktapreview.com';
 const OKTA_CLIENT_ID = '0oakfraa1hdPlNx8H1d7';
 // Using window.location.origin to ensure the correct protocol and port are used
@@ -51,6 +44,8 @@ export const login = async () => {
   }
 };
 
+// Note: This function is kept for backward compatibility,
+// but you should preferably use the useOktaAuth hook's signOut method
 export const logout = async () => {
   try {
     // First clear the token manager
