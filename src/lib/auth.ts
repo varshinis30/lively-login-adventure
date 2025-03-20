@@ -3,7 +3,7 @@ import { OktaAuth, OktaAuthOptions, UserClaims } from '@okta/okta-auth-js';
 
 const OKTA_DOMAIN = 'cdw-oie.oktapreview.com';
 const OKTA_CLIENT_ID = '0oakfraa1hdPlNx8H1d7';
-// Using window.location.origin to ensure the correct protocol and port are used
+// Using protocol-relative URL to ensure the correct protocol is used
 const REDIRECT_URI = `${window.location.origin}/login/callback`;
 
 export const oktaAuthConfig: OktaAuthOptions = {
