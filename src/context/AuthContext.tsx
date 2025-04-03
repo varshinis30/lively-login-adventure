@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "You have been logged out of your account.",
       });
       
-      // Additional cleanup
+      // Additional cleanup to ensure full logout
       localStorage.removeItem('okta-token-storage');
       sessionStorage.clear();
       
