@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserClaims } from '@okta/okta-auth-js';
-import oktaAuth, { login as oktaLogin, isAuthenticated as checkAuth, getUserInfo, handleAuthCallback } from '@/lib/auth';
+import oktaAuth, { login as oktaLogin, logout as oktaLogout, isAuthenticated as checkAuth, getUserInfo, handleAuthCallback } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -94,18 +94,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAuthenticated(false);
       setUser(null);
       
-      // Clear tokens from token manager
-      oktaAuth.tokenManager.clear();
-      
-      // Perform signOut
-      await oktaAuth.signOut({
-        postLogoutRedirectUri: window.location.origin,
-        clearTokensBeforeRedirect: true,
-      });
-      
-      // Additional cleanup to ensure full logout
-      localStorage.removeItem('okta-token-storage');
-      sessionStorage.clear();
+      // Use the improved oktaLogout function
+      await oktaLogout();
       
       // Show success toast
       toast({

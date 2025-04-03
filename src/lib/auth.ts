@@ -44,6 +44,44 @@ export const login = async () => {
   }
 };
 
+// Adding back the logout function with a more reliable approach
+export const logout = async (): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    try {
+      // Clear tokens immediately
+      oktaAuth.tokenManager.clear();
+      
+      // Remove any Okta-related storage items
+      localStorage.removeItem('okta-token-storage');
+      localStorage.removeItem('okta-cache-storage');
+      sessionStorage.clear();
+      
+      // Use a timeout to ensure the logout process has time to send its request
+      const logoutTimeout = setTimeout(() => {
+        // Resolve even if there's no response from Okta - we've already cleared local tokens
+        resolve();
+      }, 3000); // 3 second timeout
+      
+      // Attempt the standard signOut
+      oktaAuth.signOut()
+        .then(() => {
+          clearTimeout(logoutTimeout);
+          resolve();
+        })
+        .catch((error) => {
+          console.error('Okta signOut error (but local logout completed):', error);
+          clearTimeout(logoutTimeout);
+          // Still resolve since we've cleared local tokens
+          resolve();
+        });
+    } catch (error) {
+      console.error('Error in logout function:', error);
+      // Still resolve since we've likely cleared tokens
+      resolve();
+    }
+  });
+};
+
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
     const authState = await oktaAuth.isAuthenticated();
