@@ -44,36 +44,47 @@ export const login = async () => {
   }
 };
 
-// Adding back the logout function with a more reliable approach
+// Completely revamped logout function to ensure a complete logout
 export const logout = async (): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     try {
-      // Clear tokens immediately
+      // First clear all local tokens and storage
       oktaAuth.tokenManager.clear();
-      
-      // Remove any Okta-related storage items
       localStorage.removeItem('okta-token-storage');
       localStorage.removeItem('okta-cache-storage');
       sessionStorage.clear();
       
-      // Use a timeout to ensure the logout process has time to send its request
-      const logoutTimeout = setTimeout(() => {
-        // Resolve even if there's no response from Okta - we've already cleared local tokens
-        resolve();
-      }, 3000); // 3 second timeout
+      // Force clear any cookies by setting expiration to past date
+      document.cookie.split(";").forEach(function(c) {
+        if (c.trim().startsWith("okta-")) {
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/");
+        }
+      });
       
-      // Attempt the standard signOut
-      oktaAuth.signOut()
-        .then(() => {
-          clearTimeout(logoutTimeout);
-          resolve();
-        })
-        .catch((error) => {
-          console.error('Okta signOut error (but local logout completed):', error);
-          clearTimeout(logoutTimeout);
-          // Still resolve since we've cleared local tokens
-          resolve();
-        });
+      // Set a timeout to ensure we don't hang forever
+      const logoutTimeout = setTimeout(() => {
+        console.log('Logout timeout reached - completing logout process');
+        resolve();
+      }, 3000);
+      
+      // Try the proper Okta signOut with full redirect
+      oktaAuth.signOut({
+        postLogoutRedirectUri: window.location.origin,
+        clearTokensBeforeRedirect: true,
+        revokeAccessToken: true,
+        revokeRefreshToken: true
+      })
+      .then(() => {
+        clearTimeout(logoutTimeout);
+        console.log('Okta signOut completed successfully');
+        resolve();
+      })
+      .catch((error) => {
+        clearTimeout(logoutTimeout);
+        console.error('Okta signOut API error:', error);
+        // Still resolve since we've cleared local tokens
+        resolve();
+      });
     } catch (error) {
       console.error('Error in logout function:', error);
       // Still resolve since we've likely cleared tokens

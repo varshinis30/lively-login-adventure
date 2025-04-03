@@ -31,6 +31,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const { toast } = useToast();
 
+  // Function to fully reset authentication state
+  const resetAuthState = () => {
+    setIsAuthenticated(false);
+    setUser(null);
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       setIsLoading(true);
@@ -60,8 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         console.error('Authentication error:', error);
-        setIsAuthenticated(false);
-        setUser(null);
+        resetAuthState();
       } finally {
         setIsLoading(false);
       }
@@ -90,21 +95,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     setIsLoading(true);
     try {
-      // First update local state
-      setIsAuthenticated(false);
-      setUser(null);
+      // First reset our internal state
+      resetAuthState();
       
-      // Use the improved oktaLogout function
+      // Then call the improved Okta logout function
       await oktaLogout();
       
-      // Show success toast
+      // Reload the page to ensure all Okta state is cleared
+      window.location.href = '/';
+      
+      // Show success toast before reload
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account.",
       });
-      
-      // Redirect to home page
-      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
       toast({
@@ -112,6 +116,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "There was a problem logging you out. Please try again.",
         variant: "destructive",
       });
+      // Even on error, we should redirect to home and force a page reload
+      window.location.href = '/';
     } finally {
       setIsLoading(false);
     }
